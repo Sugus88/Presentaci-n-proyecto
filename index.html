@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyecto Final FP Dual · Aimar Unanua · SPIN</title>
+<!-- Fuentes tipográficas de alta calidad -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,900;1,400;1,900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --rojo: #D61C38; 
+  --dorado: #D4AF37; 
+  --dorado-claro: #F3E5AB;
+  --navy: #0A192F; 
+  --navy-dark: #061020;
+  --crema: #F9F6F0; 
+  --blanco: #FFFFFF;
+  --gris-oscuro: #121214; 
+  --gris: #4A4A4A; 
+  --gris-claro: #8E8E93;
+  --card-dark: rgba(255, 255, 255, 0.03);
+  --border-dark: rgba(212, 175, 55, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  font-family: 'Plus Jakarta Sans', sans-serif; 
+  background: #02060d; 
+  overflow: hidden; 
+  height: 100vh; 
+  width: 100vw; 
+  user-select: none; 
+  color: #E2E8F0;
+}
+
+/* Barra de progreso minimalista */
+.progress-bar { 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  height: 4px; 
+  background: linear-gradient(90deg, var(--rojo), var(--dorado)); 
+  transition: width .5s cubic-bezier(0.22, 1, 0.36, 1); 
+  z-index: 300; 
+}
+
+.deck { width: 100vw; height: 100vh; position: relative; }
+
+/* Animación cinematográfica premium */
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  filter: blur(20px) brightness(0.8);
+  transform: scale(0.95);
+  pointer-events: none;
+  transition: 
+    opacity .8s cubic-bezier(0.16, 1, 0.3, 1),
+    filter .8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform .8s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.slide.active {
+  opacity: 1;
+  filter: blur(0px) brightness(1);
+  transform: scale(1);
+  pointer-events: all;
+}
+
+.slide.exit {
+  opacity: 0;
+  filter: blur(20px) brightness(0.8);
+  transform: scale(1.05);
+}
+
+/* Efecto parallax suave en las imágenes */
+.slide .img-panel img {
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.slide.active .img-panel img { transform: scale(1); }
+.slide.exit .img-panel img { transform: scale(1.08); }
+
+.top-bar { 
+  position: absolute; 
+  top: 0; 
+  left: 0; 
+  right: 0; 
+  height: 4px; 
+  background: linear-gradient(90deg, var(--rojo) 0%, var(--dorado) 50%, var(--rojo) 100%); 
+  z-index: 10; 
+}
+
+.slide-label { 
+  position: absolute; 
+  top: 30px; 
+  left: 40px; 
+  font-size: 11px; 
+  font-weight: 700; 
+  letter-spacing: 4px; 
+  text-transform: uppercase; 
+  color: var(--dorado); 
+  opacity: 0.8; 
+  z-index: 10; 
+}
+.slide-label.dark { color: var(--rojo); }
+
+.slide-num { 
+  position: absolute; 
+  bottom: 30px; 
+  right: 40px; 
+  font-size: 11px; 
+  font-weight: 600; 
+  letter-spacing: 2px; 
+  z-index: 10; 
+}
+.slide-num.light { color: rgba(255, 255, 255, 0.3); }
+.slide-num.dark { color: rgba(0, 0, 0, 0.3); }
+
+/* Estructuras de paneles */
+.hl { flex-direction: row; background: linear-gradient(135deg, var(--navy-dark), #030a16); }
+.hll { flex-direction: row; background: var(--crema); color: var(--gris-oscuro); }
+.fd { background: linear-gradient(135deg, #111115, #1c1c22); }
+.fl { background: var(--crema); color: var(--gris-oscuro); }
+
+.img-panel { flex-shrink: 0; height: 100%; position: relative; overflow: hidden; }
+.img-panel img { width: 100%; height: 100%; object-fit: cover; }
+.img-panel .overlay { position: absolute; inset: 0; }
+.img-panel .cap { 
+  position: absolute; 
+  bottom: 30px; 
+  left: 30px; 
+  font-size: 10px; 
+  font-weight: 600; 
+  letter-spacing: 2px; 
+  text-transform: uppercase; 
+  z-index: 2; 
+  padding: 6px 12px; 
+  background: rgba(0,0,0,0.4); 
+  backdrop-filter: blur(4px); 
+  border-radius: 3px;
+}
+
+.hl .img-panel { width: 40%; }
+.hl .img-panel img { filter: saturate(0.6) brightness(0.4) contrast(1.1); }
+.hl .img-panel .overlay { background: linear-gradient(90deg, transparent 60%, #030a16 100%); }
+.hl .img-panel .cap { color: var(--dorado-claro); border: 1px solid rgba(212, 175, 55, 0.2); }
+
+.hll .img-panel { width: 38%; }
+.hll .img-panel img { filter: saturate(0.7) brightness(0.75); }
+.hll .img-panel .overlay { background: linear-gradient(90deg, transparent 60%, var(--crema) 100%); }
+.hll .img-panel .cap { color: var(--blanco); background: rgba(0,0,0,0.6); }
+
+.content-panel { flex: 1; height: 100%; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding: 80px 60px 80px 50px; }
+.content-full { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 60px 80px; }
+
+/* Tipografía Estilizada */
+.eyebrow { 
+  font-size: 11px; 
+  font-weight: 700; 
+  letter-spacing: 4px; 
+  text-transform: uppercase; 
+  margin-bottom: 20px; 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+}
+.eyebrow::before { content: ''; width: 30px; height: 2px; flex-shrink: 0; }
+.eyebrow.light { color: var(--dorado); }
+.eyebrow.light::before { background: var(--dorado); }
+.eyebrow.dark { color: var(--rojo); }
+.eyebrow.dark::before { background: var(--rojo); }
+
+h2.st { font-family: 'Playfair Display', serif; font-weight: 900; line-height: 1.15; margin-bottom: 30px; letter-spacing: -0.5px; }
+h2.st.l { color: var(--blanco); font-size: clamp(30px, 3.8vw, 52px); }
+h2.st.d { color: var(--gris-oscuro); font-size: clamp(28px, 3.5vw, 48px); }
+h2.st em { font-style: italic; color: var(--dorado); font-family: 'Playfair Display', serif; font-weight: 400; }
+h2.st .r { color: var(--rojo); }
+
+/* Cuadrículas */
+.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+/* Tarjetas Oscuras Modernas */
+.cd { 
+  background: var(--card-dark); 
+  border: 1px solid var(--border-dark); 
+  border-radius: 8px; 
+  padding: 22px 20px; 
+  position: relative; 
+  overflow: hidden; 
+  transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cd:hover { 
+  border-color: rgba(212, 175, 55, 0.4); 
+  background: rgba(255,255,255,0.06); 
+  transform: translateY(-4px); 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.cd .ab { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--rojo), var(--dorado)); transform: scaleX(0); transition: transform .4s ease; transform-origin: left; }
+.cd:hover .ab { transform: scaleX(1); }
+.cd .ci { font-size: 24px; margin-bottom: 12px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+.cd h4 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--dorado); margin-bottom: 8px; }
+.cd p { font-size: 12.5px; line-height: 1.6; color: #94A3B8; }
+
+/* Tarjetas Claras Modernas */
+.cl { 
+  background: var(--blanco); 
+  border-radius: 8px; 
+  border-top: 4px solid var(--rojo); 
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04); 
+  padding: 22px; 
+  transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cl:hover { 
+  transform: translateY(-4px); 
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08); 
+}
+.cl .num { font-size: 10px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--rojo); margin-bottom: 10px; }
+.cl h4 { font-size: 14px; font-weight: 700; color: var(--gris-oscuro); margin-bottom: 8px; line-height: 1.3; }
+.cl p { font-size: 12.5px; line-height: 1.6; color: var(--gris); }
+
+/* Módulos (Badges) */
+.mb { background: var(--blanco); border-radius: 6px; border-top: 4px solid; box-shadow: 0 2px 10px rgba(0,0,0,0.03); padding: 16px 16px 14px; transition: transform 0.2s; }
+.mb:hover { transform: scale(1.02); }
+.mb.hi { border-color: var(--rojo); }
+.mb.med { border-color: var(--dorado); }
+.mb.low { border-color: #CBD5E1; }
+.mb .lv { display: inline-block; font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; }
+.mb.hi .lv { background: rgba(214,28,56,0.08); color: var(--rojo); }
+.mb.med .lv { background: rgba(212,175,55,0.12); color: #9A7B1C; }
+.mb.low .lv { background: #F1F5F9; color: #64748B; }
+.mb h4 { font-size: 12.5px; font-weight: 700; color: var(--gris-oscuro); margin-bottom: 6px; line-height: 1.3; }
+.mb p { font-size: 11.5px; color: var(--gris-claro); line-height: 1.45; }
+
+/* Línea de Tiempo */
+.tl { border-left: 2px solid rgba(212, 175, 55, 0.25); padding-left: 26px; }
+.ti { margin-bottom: 22px; position: relative; }
+.ti::before { content: ''; position: absolute; left: -32px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--dorado); box-shadow: 0 0 0 5px rgba(212, 175, 55, 0.2); }
+.td { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--dorado); margin-bottom: 4px; }
+.tt { font-size: 13px; line-height: 1.6; color: #CBD5E1; }
+.tt strong { color: var(--blanco); font-weight: 600; }
+
+/* Contadores Estadísticos */
+.sr { display: flex; gap: 16px; margin-bottom: 30px; }
+.sb { background: rgba(255,255,255,0.02); border: 1px solid var(--border-dark); border-radius: 6px; padding: 18px; text-align: center; flex: 1; backdrop-filter: blur(5px); }
+.sb .n { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 900; color: var(--dorado); line-height: 1; }
+.sb .l { font-size: 11px; font-weight: 500; color: #64748B; margin-top: 6px; line-height: 1.3; text-transform: uppercase; letter-spacing: 1px; }
+
+/* Cajas de Competencias */
+.cb { background: var(--card-dark); border: 1px solid rgba(212, 175, 55, 0.12); border-radius: 6px; padding: 16px 14px; display: flex; flex-direction: column; justify-content: space-between; }
+.cb .e { font-size: 20px; margin-bottom: 6px; }
+.cb h4 { font-size: 12px; font-weight: 700; color: var(--dorado); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.cb p { font-size: 11.5px; color: #94A3B8; line-height: 1.45; }
+.cb .q { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(212,175,55,0.08); font-size: 10.5px; font-style: italic; color: #64748B; line-height: 1.4; }
+
+/* Bloques Críticos */
+.cp { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.cx { background: var(--blanco); border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding: 18px 20px; border-left: 4px solid; }
+.cx.pr { border-color: var(--rojo); }
+.cx.me { border-color: var(--dorado); }
+.cx h4 { font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.cx.pr h4 { color: var(--rojo); }
+.cx.me h4 { color: #9A7B1C; }
+.cx p { font-size: 12.5px; line-height: 1.55; color: var(--gris); }
+.cx p strong { color: var(--gris-oscuro); }
+
+/* Caja de Inglés */
+.eb { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 6px; padding: 24px; font-size: 13.5px; line-height: 1.7; color: #E2E8F0; margin-bottom: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.2); }
+.eh { font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--dorado); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(212, 175, 55, 0.1); }
+
+/* Cajas de Conclusión */
+.cg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 30px; }
+.cbox { background: var(--card-dark); border: 1px solid var(--border-dark); border-radius: 6px; padding: 20px 18px; }
+.cbox h4 { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--dorado); margin-bottom: 10px; }
+.cbox p { font-size: 13px; color: #94A3B8; line-height: 1.6; }
+
+.bq { font-family: 'Playfair Display', serif; font-size: 17px; font-style: italic; color: #94A3B8; line-height: 1.7; max-width: 620px; position: relative; padding-left: 24px; }
+.bq::before { content: '\201C'; position: absolute; left: -6px; top: -10px; font-size: 72px; color: rgba(212, 175, 55, 0.15); font-family: 'Playfair Display', serif; line-height: 1; }
+
+.ban { margin-top: 20px; background: linear-gradient(90deg, var(--rojo), #A31027); color: var(--blanco); border-radius: 6px; padding: 14px 20px; font-size: 13px; line-height: 1.6; box-shadow: 0 4px 15px rgba(214,28,56,0.2); }
+.ban strong { font-weight: 700; color: var(--dorado-claro); }
+
+/* Navegación Flotante Estilizada */
+.nav { 
+  position: fixed; 
+  bottom: 30px; 
+  left: 50%; 
+  transform: translateX(-50%); 
+  display: flex; 
+  align-items: center; 
+  gap: 20px; 
+  background: rgba(4, 12, 24, 0.85); 
+  backdrop-filter: blur(16px); 
+  border: 1px solid rgba(212, 175, 55, 0.25); 
+  border-radius: 40px; 
+  padding: 10px 24px; 
+  z-index: 200; 
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+.nb { background: none; border: none; cursor: pointer; color: rgba(245,240,232,0.6); font-size: 16px; padding: 4px 8px; transition: all 0.2s; }
+.nb:hover { color: var(--dorado); transform: scale(1.1); }
+.nb:disabled { opacity: .15; cursor: default; transform: none; }
+.ndots { display: flex; gap: 7px; align-items: center; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(212, 175, 55, 0.2); cursor: pointer; transition: all .3s cubic-bezier(0.16, 1, 0.3, 1); }
+.dot.on { background: var(--dorado); transform: scale(1.5); box-shadow: 0 0 10px var(--dorado); }
+.nct { font-size: 11px; font-weight: 600; color: rgba(245,240,232,0.4); letter-spacing: 1.5px; min-width: 45px; text-align: center; }
+.kt { position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: rgba(212, 175, 55, 0.3); pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="pb"></div>
+<div class="deck" id="deck">
+
+<!-- ══ S1 PORTADA ══ -->
+<div class="slide active" id="s1" style="flex-direction:row;background: linear-gradient(135deg, var(--navy-dark), #030a16);">
+  <div class="top-bar"></div>
+  <div class="slide-num light">01 / 10</div>
+  <div style="width:52%;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:80px 60px;position:relative;z-index:2;">
+    <div class="eyebrow light">Proyecto Final · FP Dual · 2025–2026</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(38px,4.8vw,64px);font-weight:900;line-height:1.08;color:var(--blanco);margin-bottom:15px;">
+      Proyecto Final<br><em style="color:var(--dorado-claro);">FP Dual</em>
+    </h2>
+    <p style="font-size:14px;font-weight:400;color:#64748B;margin-bottom:45px;letter-spacing: 0.5px;">Grado Medio en Gestión Administrativa</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 40px;border-top:1px solid rgba(255,255,255,0.05);padding-top:20px;">
+      <div style="font-size:13px;color:#94A3B8;"><strong style="color:var(--dorado);font-weight:600;">Alumno:</strong> Aimar Unanua</div>
+      <div style="font-size:13px;color:#94A3B8;"><strong style="color:var(--dorado);font-weight:600;">Empresa:</strong> SPIN – Gobierno de Navarra</div>
+      <div style="font-size:13px;color:#94A3B8;"><strong style="color:var(--dorado);font-weight:600;">Tutora:</strong> Esther Herrera Alzu</div>
+      <div style="font-size:13px;color:#94A3B8;"><strong style="color:var(--dorado);font-weight:600;">Período:</strong> Enero – Abril 2026</div>
+    </div>
+  </div>
+  <div class="img-panel" style="width:48%;height:100%;position:relative;overflow:hidden;">
+    <!-- CAMBIAR FOTO AQUÍ (S1 - PORTADA) -->
+    <img src="https://bastida.eu/wp-content/uploads/2018/11/manualPIN3.jpg"
+         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=900&q=80&fit=crop'"
+         alt="Plan Internacional de Navarra" style="width:100%;height:100%;object-fit:cover;filter:saturate(.7) brightness(.55);">
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg, #030a16 0%,transparent 40%);"></div>
+    <div style="position:absolute;bottom:60px;right:60px;z-index:3;background:rgba(4, 12, 24, 0.7);backdrop-filter:blur(8px);border:1px solid var(--border-dark);border-radius:6px;padding:16px 26px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.3)">
+      <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:var(--dorado);letter-spacing:4px;">PIN</div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#64748B;margin-top:4px;">Plan Internacional</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S2 INTRODUCCIÓN ══ -->
+<div class="slide hll" id="s2">
+  <div class="top-bar"></div>
+  <div class="slide-label dark">FP Dual · 2025–2026</div>
+  <div class="slide-num dark">02 / 10</div>
+  <!-- SEGUNDA IMAGEN (MOVIDA A LA DERECHA) -->
+  <div class="img-panel" style="background-image: url('https://imgs.search.brave.com/aqZAu40OndnIwdRwL2BP8hvMnui8sH4F0kKgQr288hU/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/bXV0dWF2ZW5pci5j/b20vd3AtY29udGVu/dC91cGxvYWRzLzIw/MTkvMDYvbnVldmEt/c2VkZS1tdXR1YXZl/bmlyLTE5ODEuanBn'); background-size: cover; background-position: 40% center;">
+    <!-- CAMBIAR FOTO AQUÍ (S2 - INTRODUCCIÓN) - Aunque ahora se usa background-image para mejor control -->
+    <!-- Se mantiene el tag img para la lógica de parallax aunque esté oculto visualmente -->
+    <img src="https://imgs.search.brave.com/aqZAu40OndnIwdRwL2BP8hvMnui8sH4F0kKgQr288hU/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/bXV0dWF2ZW5pci5j/b20vd3AtY29udGVu/dC91cGxvYWRzLzIw/MTkvMDYvbnVldmEt/c2VkZS1tdXR1YXZl/bmlyLTE5ODEuanBn'"
+         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=700&q=80&fit=crop'" alt="Oficina profesional" style="opacity: 0;">
+    <!-- Superposición de degradado a la izquierda para legibilidad del texto si es necesario -->
+    <div class="overlay" style="background: linear-gradient(90deg, var(--crema) 0%, transparent 50%);"></div>
+    <div class="cap">Gestión administrativa internacional</div>
+  </div>
+  <div class="content-panel">
+    <div class="eyebrow dark">Introducción</div>
+    <h2 class="st d">¿Qué es<br>este <span class="r">proyecto?</span></h2>
+    <div class="g2">
+      <div class="cl"><div class="num">El objetivo</div><p>Documentar y analizar mi experiencia en <strong>SPIN</strong>, organismo del Gobierno de Navarra que apoya la internacionalización de empresas navarras.</p></div>
+      <div class="cl"><div class="num">El enfoque</div><p>No es un diario. Es la <strong>conexión entre teoría y práctica</strong>: cómo lo aprendido en el aula funciona en una oficina pública real.</p></div>
+      <div class="cl"><div class="num">El contexto</div><p>Navarra exporta casi <strong>10.000 M€/año</strong>, siendo de las CC.AA. que más exportan per cápita. SPIN hace posible ese rendimiento exterior.</p></div>
+      <div class="cl"><div class="num">La estructura</div><p>6 tareas técnicas · Todos los módulos del ciclo · Análisis de módulos de 2º · Crítica profesional · Competencias · Conclusión personal.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S3 LA EMPRESA ══ -->
+<div class="slide hl" id="s3">
+  <div class="top-bar"></div>
+  <div class="slide-label light">FP Dual · 2025–2026</div>
+  <div class="slide-num light">03 / 10</div>
+  <div class="img-panel">
+    <!-- CAMBIAR FOTO AQUÍ (S3 - LA EMPRESA) -->
+    <img src="https://imgs.search.brave.com/WjcT4BMpQkYnHZzP1aBBf0uCqu8SbEv6DSqdFvVuIZg/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy83/Lzc1L1BhbGFjaW9f/ZGVfTmF2YXJyYV8o/QXZkYV9DYXJsb3Nf/SUlJKS5qcGc"
+         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=700&q=80&fit=crop'" alt="Edificio institucional">
+    <div class="overlay"></div>
+    <div class="cap">SPIN · Pamplona, Navarra</div>
+  </div>
+  <div class="content-panel">
+    <div class="eyebrow light">Análisis de la empresa</div>
+    <h2 class="st l">SPIN · Gobierno<br>de <em>Navarra</em></h2>
+    <div class="g3">
+      <div class="cd"><div class="ab"></div><div class="ci">🏛️</div><h4>Naturaleza jurídica</h4><p>Organismo público de la Administración Foral. Parte del Plan Internacional de Navarra. Financiado con presupuesto público.</p></div>
+      <div class="cd"><div class="ab"></div><div class="ci">🌍</div><h4>Actividad</h4><p>Internacionalización de pymes navarras: agroalimentario, automoción, tecnología. Misiones, ferias, asesoramiento.</p></div>
+      <div class="cd"><div class="ab"></div><div class="ci">💻</div><h4>Herramientas</h4><p>Microsoft Dynamics 365 (CRM), Power BI, Microsoft 365 y herramienta de IA corporativa del Gobierno de Navarra.</p></div>
+      <div class="cd"><div class="ab"></div><div class="ci">📋</div><h4>Normativa</h4><p>EBEP, Convenio CFN, Ley 31/1995 PRL, RGPD y LOPD-GDD. Modelo 330 de IVA (régimen foral navarro).</p></div>
+      <div class="cd"><div class="ab"></div><div class="ci">🏦</div><h4>Clientes</h4><p>Pymes navarras exportadoras: bodegas, conserveras, automoción, tecnología. Relación institucional, no comercial.</p></div>
+      <div class="cd"><div class="ab"></div><div class="ci">👩‍💼</div><h4>Mi rol</h4><p>Auxiliar administrativo: CRM, facturación, Power BI, archivado, apoyo a misiones internacionales.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S4 DÍA A DÍA ══ -->
+<div class="slide fl" id="s4">
+  <div class="top-bar"></div>
+  <div class="slide-label dark">FP Dual · 2025–2026</div>
+  <div class="slide-num dark">04 / 10</div>
+  <div class="content-full">
+    <div class="eyebrow dark">Día a día</div>
+    <h2 class="st d" style="margin-bottom:18px;">Mi día a día<br>en <span class="r">SPIN</span></h2>
+    <div class="g3">
+      <div class="cl"><h4>📊 Excel y Office</h4><p>Limpieza y organización de datos, registro de documentos, elaboración de plantillas y redacción de informes.</p></div>
+      <div class="cl"><h4>🗃️ CRM Dynamics 365</h4><p>Alta de empresas, actualización de registros, vinculación a ferias y misiones comerciales.</p></div>
+      <div class="cl"><h4>📈 Power BI</h4><p>Creación de informes visuales con datos de encuestas de satisfacción y comercio exterior.</p></div>
+      <div class="cl"><h4>🤖 Inteligencia Artificial</h4><p>Integración de la herramienta de IA corporativa en el trabajo diario y formación al equipo.</p></div>
+      <div class="cl"><h4>🌍 Apoyo a misiones</h4><p>Preparación de materiales, presentaciones y documentación para misiones comerciales internacionales.</p></div>
+      <div class="cl"><h4>🗂️ Gestión documental</h4><p>Archivo, organización y destrucción segura de documentación confidencial aplicando la normativa RGPD.</p></div>
+    </div>
+    <div class="ban"><strong>Mi conclusión:</strong> En el instituto los datos son perfectos. En la empresa real me llegaban incompletos, con errores y en desorden. Esa diferencia es la más importante que me llevo.</div>
+  </div>
+</div>
+
+<!-- ══ S5 TAREA IA ══ -->
+<div class="slide hl" id="s5">
+  <div class="top-bar"></div>
+  <div class="slide-label light">FP Dual · 2025–2026</div>
+  <div class="slide-num light">05 / 10</div>
+  <div class="img-panel">
+    <!-- CAMBIAR FOTO AQUÍ (S5 - TAREA IA) -->
+    <img src="https://images.unsplash.com/photo-1655720828018-edd2daec9349?w=700&q=80&fit=crop"
+         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=700&q=80&fit=crop'" alt="Inteligencia artificial">
+    <div class="overlay"></div>
+    <div class="cap">IA corporativa · SPIN · 2026</div>
+  </div>
+  <div class="content-panel">
+    <div class="eyebrow light">Tarea destacada</div>
+    <h2 class="st l">La <em>IA</em> que<br>nadie usaba</h2>
+    <div class="sr">
+      <div class="sb"><div class="n">4</div><div class="l">bloques de formación</div></div>
+      <div class="sb"><div class="n">2</div><div class="l">sesiones impartidas</div></div>
+      <div class="sb"><div class="n">0</div><div class="l">tareas encargadas</div></div>
+      <div class="sb"><div class="n">∞</div><div class="l">iniciativa propia</div></div>
+    </div>
+    <div class="tl">
+      <div class="ti"><div class="td">Febrero 2026 — Descubrimiento</div><div class="tt">Herramienta corporativa disponible y <strong>sin usar en el departamento</strong>. La integro en silencio para resumir informes, redactar borradores y estructurar datos.</div></div>
+      <div class="ti"><div class="td">Esther pregunta</div><div class="tt">Mi tutora nota que termino tareas más rápido de lo esperado. Me pide <strong>preparar una presentación para todo el equipo</strong>.</div></div>
+      <div class="ti"><div class="td">12 Marzo — Civibox</div><div class="tt">Formación externa con introducción, casos de uso, límites responsables y <strong>demostración en vivo</strong>.</div></div>
+      <div class="ti"><div class="td">27 Marzo — Test de seguimiento</div><div class="tt"><strong>Sesión con toda la plantilla.</strong> De herramienta ignorada a herramienta adoptada por el equipo.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S6 MÓDULOS ══ -->
+<div class="slide hll" id="s6">
+  <div class="top-bar"></div>
+  <div class="slide-label dark">FP Dual · 2025–2026</div>
+  <div class="slide-num dark">06 / 10</div>
+  <div class="img-panel">
+    <!-- CAMBIAR FOTO AQUÍ (S6 - MÓDULOS) -->
+    <img src="https://imgs.search.brave.com/GgD9jcyN8XzqMSfOAcoUU-Gpimh1JgEVKShEC3JUCiY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly4zdGF0/aWMudmVjdGVlenku/Y29tL3N5c3RlbS9y/ZXNvdXJjZXMvdGh1/bWJuYWlscy8wMTMv/MDMwLzczNy9zbWFs/bC9zdG9jay1tYXJr/ZXQtb3ItZm9yZXgt/dHJhZGluZy1ncmFw/aC1pbi1ncmFwaGlj/LWRvdWJsZS1leHBv/c3VyZS1hYnN0cmFj/dC1idXNpbmVzcy1m/aW5hbmNlLWJhY"
+         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=700&q=80&fit=crop'" alt="Análisis de datos">
+    <div class="overlay"></div>
+    <div class="cap">Power BI · Análisis de datos</div>
+  </div>
+  <div class="content-panel" style="padding:52px 48px 52px 36px;">
+    <div class="eyebrow dark">Relación con el ciclo</div>
+    <h2 class="st d" style="font-size:clamp(22px,2.8vw,36px);margin-bottom:16px;">Módulos del ciclo<br>en la <span class="r">práctica real</span></h2>
+    <div class="g4" style="gap:9px;">
+      <div class="mb hi"><span class="lv">★★★</span><h4>Tratamiento Informático</h4><p>Excel, Word, PowerPoint, Power BI. El más aplicado del ciclo.</p></div>
+      <div class="mb med"><span class="lv">★★</span><h4>Contabilidad</h4><p>Base para revisar facturas e identificar cuentas. Aplicación puntual, no el grueso del trabajo.</p></div>
+      <div class="mb med"><span class="lv">★★</span><h4>RRHH</h4><p>Leer y archivar nóminas ya calculadas. Útil para entender los documentos, no para generarlos.</p></div>
+      <div class="mb low"><span class="lv">★</span><h4>Empresa en el Aula</h4><p>La empresa simulada se hace en grupo. En SPIN trabajé de forma autónoma y los errores tenían consecuencias reales.</p></div>
+      <div class="mb low"><span class="lv">★</span><h4>Empresa y Administración</h4><p>Útil como contexto general, aunque el sector público y el régimen foral navarro se aleja bastante de lo visto en clase.</p></div>
+      <div class="mb low"><span class="lv">★</span><h4>Inglés</h4><p>Interfaces en inglés, correos a contactos, documentación de comercio exterior.</p></div>
+    </div>
+    <div style="display:flex;gap:18px;margin-top:16px;">
+      <span style="font-size:11px;font-weight:600;color:var(--gris);display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--rojo);display:inline-block;"></span>Alta aplicación</span>
+      <span style="font-size:11px;font-weight:600;color:var(--gris);display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--dorado);display:inline-block;"></span>Media/indirecta</span>
+      <span style="font-size:11px;font-weight:600;color:var(--gris);display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:#bbb;display:inline-block;"></span>Orientativo</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S7 COMPETENCIAS ══ -->
+<div class="slide fd" id="s7">
+  <div class="top-bar"></div>
+  <div class="slide-label light">FP Dual · 2025–2026</div>
+  <div class="slide-num light">07 / 10</div>
+  <div class="content-full" style="padding:50px 62px;">
+    <div style="grid-template-columns:260px 1fr;gap:44px;align-items:start;display:grid;">
+      <div>
+        <div class="eyebrow light">Competencias</div>
+        <h2 class="st l" style="font-size:clamp(30px,3.8vw,50px);margin-bottom:18px;">Lo que aprendí<br>sin <em>querer</em></h2>
+        <!-- CAMBIAR FOTO AQUÍ (S7 - COMPETENCIAS) -->
+        <img src="https://thumbs.dreamstime.com/b/vertical-vector-winding-path-road-to-success-layered-mountain-striking-illustration-depicting-white-ascending-steep-418853237.jpg"
+             onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?w=500&q=80&fit=crop'" alt="Presentación al equipo"
+             style="width:100%;border-radius:6px;object-fit:cover;height:165px;filter:saturate(.55) brightness(.45);border:1px solid rgba(212,175,55,0.15);">
+        <p style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:10px;letter-spacing:1px;text-transform:uppercase;font-weight:600;">Formación de IA al equipo · Marzo 2026</p>
+      </div>
+      <div class="g4" style="gap:9px;align-content:start;">
+        <div class="cb"><div class="e">🎯</div><h4>Responsabilidad</h4><p>Ante duplicados en CRM: parar y consultar antes de fusionar aunque hubiera prisa.</p><div class="q">Responsabilidad es a veces poner el freno y preguntar.</div></div>
+        <div class="cb"><div class="e">🧭</div><h4>Autonomía</h4><p>Al final: objetivo asignado, tiempos gestionados de forma independiente.</p><div class="q">Nadie pidió la formación de IA. La detecté y la impartí.</div></div>
+        <div class="cb"><div class="e">🔄</div><h4>Adaptación</h4><p>De CRM durante días a charla para todo el departamento en 48 horas.</p><div class="q">No terminó tras las primeras semanas. Continuó hasta el final.</div></div>
+        <div class="cb"><div class="e">⏱️</div><h4>Gestión del tiempo</h4><p>Micro-planificación diaria: qué es urgente, qué puede esperar.</p><div class="q">Antes me quedaba en lo interesante, no en lo urgente.</div></div>
+        <div class="cb"><div class="e">🗣️</div><h4>Comunicación</h4><p>Elegir el canal correcto, modular según el interlocutor.</p><div class="q">Hacer complejo lo simple sin perder rigor.</div></div>
+        <div class="cb"><div class="e">🔧</div><h4>Resolución problemas</h4><p>CRM bloqueado: aceptar, buscar alternativa y avanzar mientras el soporte resuelve.</p><div class="q">Hay problemas que no se resolverán hoy.</div></div>
+        <div class="cb"><div class="e">🤝</div><h4>Trabajo en equipo</h4><p>Coordinar el Civibox: contenidos, tiempos, ensayo y negociación.</p><div class="q">Colaborar es anticiparse al impacto en los demás.</div></div>
+        <div class="cb"><div class="e">🌱</div><h4>Iniciativa</h4><p>Identificar algo mejorable y proponerlo aunque nadie te lo pida.</p><div class="q">En la empresa es lo que más se nota.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S8 ANÁLISIS CRÍTICO ══ -->
+<div class="slide hll" id="s8">
+  <div class="top-bar"></div>
+  <div class="slide-label dark">FP Dual · 2025–2026</div>
+  <div class="slide-num dark">08 / 10</div>
+  <div class="img-panel">
+    <!-- CAMBIAR FOTO AQUÍ (S8 - ANÁLISIS CRÍTICO) -->
+    <img src="https://images.unsplash.com/photo-1568667256549-094345857637?w=700&q=80&fit=crop"
+         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=700&q=80&fit=crop'" alt="Archivado de documentos">
+    <div class="overlay"></div>
+    <div class="cap">Purga documental · Marzo 2026</div>
+  </div>
+  <div class="content-panel" style="padding:52px 48px 52px 36px;">
+    <div class="eyebrow dark">Análisis crítico profesional</div>
+    <h2 class="st d" style="font-size:clamp(22px,2.8vw,38px);margin-bottom:16px;">Lo que vi que<br>se podía <span class="r">mejorar</span></h2>
+    <div class="cp">
+      <div class="cx pr"><h4>⚠ Problema</h4><p><strong>CRM sin procedimientos:</strong> No existía guía de cómo dar de alta empresas ni cómo nombrar los archivos de importación.</p></div>
+      <div class="cx me"><h4>→ Propuesta</h4><p>Manual de procedimientos administrativos internos con criterios claros y ejemplos. Facilita incorporaciones y reduce dependencia del conocimiento no escrito.</p></div>
+      <div class="cx pr"><h4>⚠ Problema</h4><p><strong>RGPD no cumplido del todo:</strong> Archivos físicos desde 2008 con datos de personas superaban los plazos de conservación.</p></div>
+      <div class="cx me"><h4>→ Propuesta</h4><p>Protocolo de ciclo de vida del documento: tiempo de conservación, acceso autorizado y método de eliminación segura.</p></div>
+      <div class="cx pr"><h4>⚠ Problema</h4><p><strong>Tecnología contratada pero no adoptada:</strong> Dynamics 365 con funcionalidades avanzadas sin usar. IA corporativa pagada e ignorada.</p></div>
+      <div class="cx me"><h4>→ Propuesta</h4><p>Sesiones cortas de formación tecnológica en el calendario. Cada miembro comparte con el equipo lo que sabe hacer.</p></div>
+      <div class="cx pr"><h4>⚠ Problema</h4><p><strong>CRM sin formación previa:</strong> Muchos compañeros que tenían que usar el CRM no sabían cómo manejarlo, generando errores y dependencia constante de otros.</p></div>
+      <div class="cx me"><h4>→ Propuesta</h4><p>Formación básica obligatoria antes de empezar a usar el sistema. Evitaría errores desde el principio y reduciría la carga sobre quienes sí saben usarlo.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S9 INGLÉS ══ -->
+<div class="slide hl" id="s9">
+  <div class="top-bar"></div>
+  <div class="slide-label light">FP Dual · 2025–2026</div>
+  <div class="slide-num light">09 / 10</div>
+  <div class="img-panel">
+    <!-- CAMBIAR FOTO AQUÍ (S9 - INGLÉS) -->
+    <img src="https://images.unsplash.com/photo-1499678329028-101435549a4e?w=700&q=80&fit=crop"
+         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=700&q=80&fit=crop'" alt="Comercio internacional">
+    <div class="overlay"></div>
+    <div class="cap">English in the workplace</div>
+  </div>
+  <div class="content-panel">
+    <div class="eyebrow light">English Module</div>
+    <h2 class="st l">My <em>English</em> experience<br>during the internship</h2>
+    
+    <div class="eb">
+      <div class="eh">📊 How I used English at work</div>
+      <p style="margin-bottom: 14px;">
+        At SPIN, <strong>I did not use English every day</strong>. Most of the work was in Spanish.
+      </p>
+      <p>
+        But English was still there. The Dynamics 365 and Power BI apps are in English. I also read some trade documents in English. And a coworker gave me exercises and materials to keep practising in my free time.
+      </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div style="background:rgba(255,255,255,.02); border:1px solid rgba(212,175,55,0.12); padding:14px; border-radius:6px;">
+        <h4 style="font-size:11px; color:var(--dorado); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; font-weight: 700;">What I expected</h4>
+        <p style="font-size:12px; color:#94A3B8;">A lot of international contact because of what SPIN does.</p>
+      </div>
+      <div style="background:rgba(255,255,255,.02); border:1px solid rgba(212,175,55,0.12); padding:14px; border-radius:6px;">
+        <h4 style="font-size:11px; color:var(--dorado); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; font-weight: 700;">What really happened</h4>
+        <p style="font-size:12px; color:#94A3B8;">English was there every day in the tools and documents, but not in conversations.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S10 CONCLUSIÓN ══ -->
+<div class="slide hl" id="s10">
+  <div class="top-bar"></div>
+  <div class="slide-label light">FP Dual · 2025–2026</div>
+  <div class="slide-num light">10 / 10</div>
+  <div class="img-panel" style="width:36%;">
+    <!-- CAMBIAR FOTO AQUÍ (S10 - CONCLUSIÓN) -->
+    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=700&q=80&fit=crop"
+         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=700&q=80&fit=crop'" alt="Equipo profesional">
+    <div class="overlay"></div>
+    <div class="cap">SPIN · Enero–Abril 2026</div>
+  </div>
+  <div class="content-panel">
+    <div class="eyebrow light">Conclusión profesional</div>
+    <h2 class="st l" style="font-size:clamp(24px,3vw,42px);">Cuatro meses que<br>cambiaron mi visión del<br><em>trabajo administrativo</em></h2>
+    <div class="cg">
+      <div class="cbox"><h4>¿Qué aprendí?</h4><p>Los datos reales son incompletos. Los sistemas fallan. La iniciativa tiene valor real. El administrativo no es operativo: es <strong style="color:var(--dorado);">estratégico</strong>.</p></div>
+      <div class="cbox"><h4>¿Me veo en este sector?</h4><p>No. Siento que la administración pública tal como la conocemos hoy puede quedar <strong style="color:var(--dorado);">obsoleta</strong> en un tiempo no muy lejano. Prefiero orientarme hacia áreas con más recorrido.</p></div>
+    </div>
+    <div class="bq">Acabo estas prácticas con ganas de seguir. La realidad tiene una densidad que ningún ejercicio puede reproducir, y lejos de asustarme, me genera curiosidad.</div>
+    <p style="font-size:11px;color:var(--dorado);letter-spacing:2px;text-transform:uppercase;margin-top:16px;font-weight:600;">Aimar Unanua · SPIN · Gobierno de Navarra · 2025–2026</p>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<div class="nav">
+  <button class="nb" id="pb2" onclick="go(-1)" disabled>◀</button>
+  <div class="ndots" id="dots"></div>
+  <div class="nct" id="ct">1/10</div>
+  <button class="nb" id="nb2" onclick="go(1)">▶</button>
+</div>
+<div class="kt">← → · espacio para navegar</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),N=slides.length;
+let cur=0,busy=false;
+const dotsEl=document.getElementById('dots'),ctEl=document.getElementById('ct'),
+      pbEl=document.getElementById('pb'),prevB=document.getElementById('pb2'),nextB=document.getElementById('nb2');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' on':'');d.onclick=()=>jump(i);dotsEl.appendChild(d);});
+function sync(){dotsEl.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur));ctEl.textContent=`${cur+1}/${N}`;pbEl.style.width=`${(cur+1)/N*100}%`;prevB.disabled=cur===0;nextB.disabled=cur===N-1;}
+function jump(idx){if(idx===cur||busy)return;busy=true;slides[cur].classList.add('exit');slides[cur].classList.remove('active');setTimeout(()=>{slides[cur].classList.remove('exit');cur=idx;slides[cur].classList.add('active');sync();setTimeout(()=>busy=false,500);},200);}
+function go(d){const n=cur+d;if(n<0||n>=N)return;jump(n);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(1);}if(e.key==='ArrowLeft'){e.preventDefault();go(-1);}if(e.key==='Home')jump(0);if(e.key==='End')jump(N-1);});
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX);
+document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50)go(d>0?1:-1);});
+sync();
+</script>
+
+<canvas id="particles" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
+<script>
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+const colors = ['rgba(212,175,55,', 'rgba(214,28,56,', 'rgba(255,255,255,'];
+const particles = Array.from({length: 90}, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  r: Math.random() * 3 + 0.8,
+  speedX: (Math.random() - 0.5) * 0.45,
+  speedY: -Math.random() * 0.7 - 0.2,
+  color: colors[Math.floor(Math.random() * colors.length)],
+  alpha: Math.random() * 0.6 + 0.2,
+  pulse: Math.random() * Math.PI * 2
+}));
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    p.pulse += 0.018;
+    const a = p.alpha + Math.sin(p.pulse) * 0.08;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = p.color + Math.max(0, Math.min(1, a)) + ')';
+    ctx.fill();
+    p.x += p.speedX;
+    p.y += p.speedY;
+    if (p.y < -5) { p.y = canvas.height + 5; p.x = Math.random() * canvas.width; }
+    if (p.x < -5) p.x = canvas.width + 5;
+    if (p.x > canvas.width + 5) p.x = -5;
+  });
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
